@@ -96,7 +96,8 @@ class ProductView(ViewSet):
     def destroy(self, request, pk):
         """Delete a product"""
         try:
-            product = Product.objects.get(pk=pk, store__seller=request.auth.user)
+            product = Product.objects.get(
+                pk=pk, store__seller=request.auth.user)
             product.delete()
             return Response(None, status=status.HTTP_204_NO_CONTENT)
         except Product.DoesNotExist as ex:
@@ -182,7 +183,7 @@ class ProductView(ViewSet):
 
         if location is not None:
             products = products.filter(location__contains=location)
-            
+
         if name is not None:
             products = products.filter(name__contains=name)
 
