@@ -168,6 +168,7 @@ class ProductView(ViewSet):
         direction = request.query_params.get('direction', None)
         location = request.query_params.get('location', None)
         name = request.query_params.get('name', None)
+        min_price = request.query_params.get('min_price', None)
 
         if number_sold:
             products = products.annotate(
@@ -183,6 +184,9 @@ class ProductView(ViewSet):
 
         if location is not None:
             products = products.filter(location__contains=location)
+        
+        if min_price is not None:
+            products = products.filter(price__gte=min_price)
 
         if name is not None:
             products = products.filter(name__contains=name)
