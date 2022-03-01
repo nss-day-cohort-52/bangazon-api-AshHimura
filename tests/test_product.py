@@ -17,12 +17,14 @@ class ProductTests(APITestCase):
 
         """
         call_command('seed_db', user_count=2)
+        #grabs user from db & their token
         self.user1 = User.objects.filter(store__isnull=False).first()
         self.token = Token.objects.get(user=self.user1)
 
         self.client.credentials(
             HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
+        #dummy data generator
         self.faker = Faker()
         self.faker.add_provider(faker_commerce.Provider)
 
