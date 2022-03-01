@@ -13,6 +13,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 class CreateProductSerializer(serializers.Serializer):
     categoryId = serializers.IntegerField()
+    storeId = serializers.IntegerField()
     name = serializers.CharField()
     price = serializers.DecimalField(decimal_places=2, max_digits=7)
     description = serializers.CharField()
