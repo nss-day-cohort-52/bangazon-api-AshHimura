@@ -2,12 +2,12 @@ from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.decorators import action
 from django.db.models import Q, Count
-
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from bangazon_api.models import Store
-from bangazon_api.serializers import StoreSerializer, MessageSerializer, AddStoreSerializer
+from bangazon_api.models import Store, Favorite
+from bangazon_api.serializers import StoreSerializer, MessageSerializer, AddStoreSerializer, CreateFavoriteSerializer
 
 
 class StoreView(ViewSet):
@@ -96,11 +96,51 @@ class StoreView(ViewSet):
         """Update a store"""
         try:
             store = Store.objects.get(pk=pk)
-            store.name = request.data['name']
-            store.description = request.data['description']
+            store.name = request.data["name"]
+            store.description = request.data["description"]
             store.save()
             return Response(None, status=status.HTTP_204_NO_CONTENT)
         except ValidationError as ex:
-            return Response({'message': ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
         except Store.DoesNotExist as ex:
-            return Response({'message': ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": ex.args[0]}, status=status.HTTP_404_NOT_FOUND)
+
+    @swagger_auto_schema(
+        request_body=CreateFavoriteSerializer(),
+        responses={
+            204: openapi.Response(
+                description="No content - store successfully favorited",
+                schema=StoreSerializer()
+            ),
+            400: openapi.Response(
+                description="ErRor! CaNnOt VaLidAtE",
+                schema=MessageSerializer()
+            ),
+            404: openapi.Response(
+                description="Sorry, I cant seem to find a store",
+                schema=MessageSerializer()
+            ),
+        }
+    )
+    @action(methods=["post"], detail=True)
+    def favorite(self, request, pk):
+        """Post request for a user to favorite a store"""
+        store = Store.objects.get(pk=pk)
+        Favorite.objects.create(
+            customer=request.auth.user,
+            store=store
+        )
+        return Response({"message": "Lovin this store"}, status=status.HTTP_201_CREATED)
+
+
+    @action(methods=["delete"], detail=True)
+    def unfavorite(self, request, pk):
+        """Delete request for a user to favorite a store"""
+        store = Store.objects.get(pk=pk)
+        favorite = Favorite.objects.get(
+            customer=request.auth.user,
+            store=store
+        )
+        favorite.delete()
+        return Response({"message": "It appears this store is garbage."}, status=status.HTTP_204_NO_CONTENT)
+    
