@@ -22,3 +22,7 @@ class StoreSerializer(serializers.ModelSerializer):
 class AddStoreSerializer(serializers.Serializer):
     name = serializers.CharField()
     description = serializers.CharField()
+
+class CreateFavoriteSerializer(serializers.Serializer):
+    favorite = serializers.BooleanField()
+    
