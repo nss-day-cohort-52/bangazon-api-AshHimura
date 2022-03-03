@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from rest_framework.authtoken.models import Token
 from bangazon_api.models import (
-    Store, Product, Category, PaymentType, Order, Favorite, Rating)
+    Store, Product, Category, PaymentType, Order, Favorite, Rating, Like)
 from bangazon_api.helpers import STATE_NAMES
 
 
@@ -59,6 +59,7 @@ class Command(BaseCommand):
             self.create_closed_orders(user)
             self.create_open_orders(user)
             self.create_favorite(user)
+            self.create_like(user)
             if user.id % 2 != 0:
                 self.create_ratings(user)
 
@@ -112,6 +113,14 @@ class Command(BaseCommand):
         Favorite.objects.create(
             customer=user,
             store=store
+        )
+    
+    def create_like(self, user):
+        product = Product.objects.get(pk=random.randint(1, Product.objects.count()))
+
+        Like.objects.create(
+            customer=user,
+            product=product
         )
 
     def create_ratings(self, user):

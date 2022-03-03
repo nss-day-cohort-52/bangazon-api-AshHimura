@@ -1,5 +1,6 @@
 from .category import Category
 from .favorite import Favorite
+from .like import Like
 from .order import Order
 from .order_product import OrderProduct
 from .payment_type import PaymentType
