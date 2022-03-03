@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.auth.models import User
 
 
 class Product(models.Model):
@@ -11,6 +12,7 @@ class Product(models.Model):
     description = models.TextField()
     quantity = models.IntegerField()
     location = models.CharField(max_length=100)
+    likes = models.ManyToManyField(User, through='Like', related_name='likes')
     image_path = models.ImageField(upload_to='products', height_field=None,
                                    width_field=None, max_length=None, null=True, blank=True)
     category = models.ForeignKey(

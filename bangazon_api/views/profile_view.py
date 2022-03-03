@@ -24,6 +24,7 @@ class ProfileView(ViewSet):
             ),
         }
     )
+    
     @action(methods=['GET'], detail=False, url_path="my-profile")
     def my_profile(self, request):
         """Get the current user's profile"""
