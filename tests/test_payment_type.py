@@ -1,4 +1,5 @@
 from faker import Faker
+import faker_commerce
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
@@ -11,7 +12,7 @@ class PaymentTests(APITestCase):
         """
         Seed the database
         """
-        call_command('seed_db', user_count=1)
+        call_command('seed_db', user_count=2)
         self.user1 = User.objects.filter(store=None).first()
         self.token = Token.objects.get(user=self.user1)
 
@@ -19,6 +20,7 @@ class PaymentTests(APITestCase):
             HTTP_AUTHORIZATION=f'Token {self.token.key}')
 
         self.faker = Faker()
+        self.faker.add_provider(faker_commerce.Provider)
 
 
     def test_create_payment_type(self):
@@ -36,4 +38,18 @@ class PaymentTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIsNotNone(response.data['id'])
         self.assertEqual(response.data["merchant_name"], data['merchant'])
-        self.assertEqual(response.data["acct_number"], data['acctNumber'])
+        self.assertEqual(response.data["obscured_num"][-4:-1], data['acctNumber'][-4:-1])
+
+    def test_delete_payment_type(self):
+        """
+        Ensure we can add a payment type for a customer.
+        """
+        data = {
+            "merchant": self.faker.credit_card_provider(),
+            "acctNumber": self.faker.credit_card_number()
+        }
+        response = self.client.post('/api/payment-types', data, format='json')
+        print(response.data)
+        response = self.client.delete(f'/api/payment-types/{response.data["id"]}')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        
